@@ -1,4 +1,5 @@
-lpc.control <- function (iter =100,  cross=TRUE, boundary = 0.005, convergence.at =0.00001, mult=NULL,  ms.h=NULL, ms.sub=30,  pruning.thresh=0.0, rho0=0.4)
+lpc.control <- function (iter =100,  cross=TRUE, boundary = 0.005, convergence.at =0.00001, mult=NULL,
+                         ms.h=NULL, ms.sub=30,  pruning.thresh=0.0, rho0=0.4)
 {
     if (boundary!=0 &&  boundary < convergence.at) {
         warning("The boundary correction will not have any effect if its threshold is set to a smaller value than the convergence criterion.")
@@ -29,7 +30,9 @@ lpc.control <- function (iter =100,  cross=TRUE, boundary = 0.005, convergence.a
     if ((ms.sub<0) || (ms.sub >100)){
        ms.sub<- 30
        warning("ms.sub needs to be a percentage between 0 and 100. The default choice 30 has been used instead.")
-     }
+    }
+
+
     list(iter = iter, cross=cross,
          boundary = boundary, convergence.at = convergence.at,
          mult=mult, ms.h=ms.h, ms.sub=ms.sub,

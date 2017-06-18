@@ -193,6 +193,33 @@ invisible()
 plot.lpc.spline <- plot.lpc
 
 
+print.lpc.spline <- function(x, digits=max(3,getOption('digits')-3), ...){
+
+  sx <- as.character(substitute(x))
+  if (sum(nchar(sx))>200){ sx<-"name.of.this.object"}
+
+  cat("\n")
+  cat("Type plot(", sx, ") to see a graphical display of the fitted object. \n\n")
+  cat("Type names(", sx, ") to see an overview of items available. \n\n")
+
+  if(class(x)=="lpc"){
+    if (x$scaled){
+      cat("The data have been scaled by dividing through \n")
+      cat(x$Misc$scaled.by)
+      cat("\n")
+    } else {
+      cat("The data have not been scaled. \n")
+    }
+  }
+  else if(class(x)=="lpc.spline"){
+    cat("A cubic spline with ", dim(x$knots.coords[[1]])[2], " knots and total arc length ", diff(range(x$knots.pi[[1]])), " has been laid through the  local centers of mass representing the local principal curve. \n")
+  }
+
+}
+
+
+
+library(rgl)
 
 #' Plot samples LPC line and scatter
 #'
@@ -201,9 +228,11 @@ plot.lpc.spline <- plot.lpc
 #'
 #' @return not have a return
 #' @export
+#' @importFrom rgl plot3d lines3d points3d
 #'
 #' @examples
-plot3D.lpc2 = function(res.lpc, normals) {
+#'
+plot3D.lpc2 = function(res.lpc, normals, outputHTML = T, outputDir = "./plot", fileName = "plot") {
 
   # res.lpc = pds
   p.pca = res.lpc$z
@@ -220,10 +249,17 @@ plot3D.lpc2 = function(res.lpc, normals) {
 
   points3d(v.normal.mean[1], v.normal.mean[2],v.normal.mean[3], color="green", size=15.0)
   points3d(v.tumor.mean[1], v.tumor.mean[2],v.tumor.mean[3], color="red", size=15.0)
+
+  if(outputHTML == TRUE){
+    if(!dir.exists(outputDir)) dir.create(outputDir, showWarnings = T, recursive = T)
+    writeWebGL(filename=paste0(outputDir,"/",fileName, ".html"), snapshot=F)
+  }
+
 }
 
 
 #' Plot samples LPC line and scatter
+#'
 #'
 #' @param res.lpc data after run get_biopath_score
 #' @param normals a vector of the samples, if samples is Normal then TRUE, else Tumor then FALSE
@@ -233,6 +269,7 @@ plot3D.lpc2 = function(res.lpc, normals) {
 #'
 #' @return not have a return
 #' @export
+#' @importFrom rgl plot3d lines3d points3d writeWebGL
 #'
 #' @examples
 plot3D.lpc = function(res.lpc, normals, outputHTML = T, outputDir = "./plot", fileName = "plot") {

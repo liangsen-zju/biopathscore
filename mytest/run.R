@@ -69,9 +69,11 @@ ranks = v_normal
 
 #attempts=100, maximize_stability=TRUE, logfile="", samplings=NULL,
 pds = get_biopath_score(data, biopath_genes,normals)
+pds2 = get_biopath_score(data, biopath_genes,normals,maximize_stability = T)
 
 save(pds, file="./_result/KEGG_P53_SIGNALING_PATHWAY.pds.RData")
 
+plot3D.lpc2(pds, normals, fileName = "kegg-dna-50")
+plot3D.lpc2(pds2, normals, fileName = "kegg-dna-50-stb")
 
-plot3D.lpc(pds, normals,fileName = "kegg-p53-100")
-plot3D.lpc2(pds, normals)
+
