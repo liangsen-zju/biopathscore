@@ -66,7 +66,6 @@ maximize_stability=FALSE
 samplings=NULL
 normals = v_normal
 ranks = v_normal
-logfile= paste0("./_result/tcga.brca.kegg.20170617.log")
 
 #attempts=100, maximize_stability=TRUE, logfile="", samplings=NULL,
 pds = get_biopath_score(data, biopath_genes,normals)

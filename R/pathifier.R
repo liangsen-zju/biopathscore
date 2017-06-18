@@ -386,8 +386,10 @@ get_biopath_data = function(data, v_biopath_genes)
 
 
 #' @export
-get_biopath_score = function(data, biopath_genes,normals=NULL, ranks=NULL,use_min = T, min_exp = 2, min_std = 0.1)
+get_biopath_score = function(data, biopath_genes,normals=NULL, ranks=NULL,attempts = 100, maximize_stability=F, use_min = T, min_exp = 2, min_std = 0.1)
 {
+
+  logfile = format(Sys.time(), "%Y%m%d-%H%M%S.log")
   cat(file=logfile,append=FALSE,'robust_score_bydist. min_exp=',min_exp,', min_std=',min_std,'\n')
 
   v_genes = rownames(data)
@@ -399,9 +401,14 @@ get_biopath_score = function(data, biopath_genes,normals=NULL, ranks=NULL,use_mi
   dat_min_std = round(min(apply(data, 1, sd)),2)
 
   # ***********
-  # Min_exp &&& min_std ???????
-  #min_exp=4, min_std=0.4
-  # data[data<min_exp]=min_exp		# the minime expression data
+  # Min_exp &&& min_std
+  # cut-off by min_std
+  min_exp = max(dat_min_exp, min_exp)
+  data[data<min_exp]=min_exp		# the minime expression data
+
+  min_std = max(dat_min_std, min_std)
+  v.data.sd = apply(data, 1, sd)
+  data = data[which(v.data.sd >= min_std), ]
 
   n.samples=ncol(data)	   # the number of Samples
 
@@ -477,26 +484,9 @@ get_biopath_score = function(data, biopath_genes,normals=NULL, ranks=NULL,use_mi
   z = (d.pathway - xm ) / xs
   t=prcomp(z, center=T, scale=T)
 
-
-  #	pca=scale(z, center=T, scale=T)
-  #	pca=pca[, order(apply(pca,2,sd), decreasing=T)]
-  #	k2=max(sum(apply(pca,2,sd)>0.5),4)
-  #	k2=min(k2,k1,0.75*dim(d.pathway)[1],sum(apply(pca,2,sd)>0.25))
-
   k0=which(summary(t)$importance[3,]>0.85)[1]
   k2=max(sum(t$sdev>1.1),4)		  # t$sdev > 1.1
   k2=min(k1,k2,k0,0.75*dim(d.pathway)[1],sum(t$sdev>0.25))
-
-  ############# 06/29/16 #
-  # z=t(apply(z, 1, function(zi){(zi-min(zi))/(max(zi)-min(zi))}))
-  # t=prcomp(z, center=T, scale=T) # oringal with pca
-  # k2=max(sum(t$sdev>quantile(t$sdev, probs=0.6),4)) # oringal with pca
-  # k2=min(k2,k1,0.75*dim(d.pathway)[1],sum(t$sdev>quantile(t$sdev, probs=0.4))) # oringal with pca
-
-  # t=prcomp(z, center=T, scale=T) #1 modify with pca
-  # k2=max(which(summary(t)$importance[3,]>0.85)[1], 4) #1 modify with pca
-  # k2=min(k2,k1,0.75*dim(d.pathway)[1],sum(t$sdev>0.05))
-  # print(summary(t)$importance[2:3,])
 
   if (k2<3) {
     si=NULL
