@@ -28,8 +28,6 @@ lpc.spline.eval <- function(lpcsl,or.pi,branch=0){
 }
 
 
-
-
 lpc.spline <- function(lpcobject, optimize=TRUE, compute.Rc=FALSE,  project=FALSE, ...){
   if (class(lpcobject)=="lpc.spline"){
      lpcobject <-lpcobject$lpcobject

@@ -10,6 +10,8 @@ library(devtools)
 library(roxygen2)
 library(testthat)
 library(knitr)
+library(rmarkdown)
+library(pand)
 
 #library(stringr)
 #library("R.oo")

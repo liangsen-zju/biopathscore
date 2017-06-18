@@ -1,10 +1,12 @@
 Package: biopathscore
-Title: What the Package Does (one line, title case)
-Version: 0.0.0.9000
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
+Title: Caculate bio-pathway score with gene expression data
+Version: 0.3
+Authors@R: c(person("Sen", "Liang", email = "liangsen_2014@163.com", role = "cre"),
+             person("Tianci", "Song", email = "songtianci1993@hotmail.com", role = "aut"),
+             person("Wei", "Du", email = "weidu@jlu.edu.cn", role = "aut"))
 Description: What the package does (one paragraph).
 Depends: R (>= 3.4.0)
-License: What license is it under?
+License: MIT
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1

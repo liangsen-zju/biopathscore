@@ -58,12 +58,15 @@ list_brca = tcga_data$BRCA
 # ********************************************
 dat_brca = list_brca$data
 dat_brca = round(dat_brca,2)
-v_normal = list_brca$normals
+v_brca_normal = list_brca$normals
 l_kegg_gs = l.kegg.gs
 l_kegg_gs_min = l.kegg.min.gs
 
 
+v_brca_normals = normals
+names(v_brca_normals) = colnames(dat_brca)
 
-devtools::use_data(dat_brca, v_normal, overwrite = T)
+devtools::use_data(v_brca_normals, overwrite = T)
+devtools::use_data(dat_brca, v_brca_normals, overwrite = T)
 devtools::use_data(l_kegg_gs, overwrite = T)
 devtools::use_data(l_kegg_gs_min, overwrite = T)

@@ -1,6 +1,6 @@
 ---
-title: "Vignette Title"
-author: "Vignette Author"
+title: "How to use biopathscore"
+author: "Sen liang, Tianci Song, Wei Du"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
@@ -9,50 +9,129 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
-Vignettes are long form documentation commonly included in packages. Because they are part of the distribution of the package, they need to be as compact as possible. The `html_vignette` output type provides a custom style sheet (and tweaks some options) to ensure that the resulting html is as small as possible. The `html_vignette` format:
+The aberrant alterations of biological functions are well known in tumorigenesis and cancer development. Hence, with advances in high-throughput sequencing technologies, capturing and quantifying the functional alterations in cancers based on expression profiles to explore cancer malignant process is highlighted as one of the important topics among cancer researches. 
 
-- Never uses retina figures
-- Has a smaller default figure size
-- Uses a custom CSS stylesheet instead of the default Twitter Bootstrap style
+Now, we propose an algorithm for quantifying biological processes by using gene expression profiles over a sample population, which involves the idea of constructing principal curves to condense information of each biological process by a novel scoring scheme on an individualized manner. And this article was published at Scientific Reports[Paper #SREP-17-11363B], "A Novel Unsupervised Algorithm for Biological Process-based Analysis on Cancer" by Tianci song, Sha Cao, Tao Sheng, Sen Liang, Wei Du, and Yanchun Liang.
 
-## Vignette Info
+Upon requests from users and collaborators, we developed this R package of "biopathscore".
 
-Note the various macros within the `vignette` section of the metadata block above. These are required in order to instruct R how to build the vignette. Note that you should change the `title` field and the `\VignetteIndexEntry` to match the title of your vignette.
-
-## Styles
-
-The `html_vignette` template includes a basic CSS theme. To override this theme you can specify your own CSS in the document metadata as follows:
-
-    output: 
-      rmarkdown::html_vignette:
-        css: mystyles.css
-
-## Figures
-
-The figure sizes have been customised so that you can easily put two images side-by-side. 
-
-```{r, fig.show='hold'}
-plot(1:10)
-plot(10:1)
+## How to cite
+```{r, warning=FALSE}
+citation("biopathscore")
 ```
 
-You can enable figure captions by `fig_caption: yes` in YAML:
 
-    output:
-      rmarkdown::html_vignette:
-        fig_caption: yes
+## Install and Load
 
-Then you can use the chunk option `fig.cap = "Your figure caption."` in **knitr**.
+### install from Github
 
-## More Examples
+```{r, eval=FALSE}
+install.packages("devtools")
+devtools::install_github("liangsen35/biopathscore")
+library("biopathscore")
 
-You can write math expressions, e.g. $Y = X\beta + \epsilon$, footnotes^[A footnote here.], and tables, e.g. using `knitr::kable()`.
+```
+### install from CRAN (!!!!not availiable now!!!)
+```{r, eval=FALSE}
+# install.packages("biopathscore")
+```
+
+
+
+## Internal Data
+- `dat_brca` a matrix, the TCGA-BRCA cancer gene expression data, each columu is a sample, each row is a gene(present by Gene ID), 
+- `v_brca_normals` a vector, the dat_brca's samples, if it is Normal then TRUE, else is Tumor then FALSE.
+- `l_kegg_gs` a list, each list is a gene ID vector of a KEGG pathway, total 186 KEGG pathway.
+- `l_kegg_gs_min` a small list of l_kegg_gs for test.
+
+```{r, results='hide'}
+library(biopathscore)
+data("dat_brca")
+data('v_brca_normals')
+data('l_kegg_gs_min')
+
+dat_brca[1:10, 1:10]
+```
 
 ```{r, echo=FALSE, results='asis'}
-knitr::kable(head(mtcars, 10))
+knitr::kable(dat_brca[1:10, 1:10])
 ```
 
-Also a quote using `>`:
+```{r}
+dim(dat_brca)
+length(v_brca_normals)
+head(v_brca_normals)
+length(l_kegg_gs_min)
+head(l_kegg_gs_min$KEGG_P53_SIGNALING_PATHWAY)
 
-> "He who gives up [code] safety for [code] speed deserves neither."
-([via](https://twitter.com/hadleywickham/status/504368538874703872))
+```
+
+## Functions
+- `get_biopath_score()` run the algorithm and get the bio-pathway score for each sample 
+- `plot3D_lpc()` plot the 3D graphics of the result
+
+### (1) get_biopath_score 
+```r
+get_biopath_score = function(data, biopath_genes,normals=NULL, ranks=NULL,attempts = 50, maximize_stability=F, use_min = T, min_exp = 2, min_std = 0.1)
+```
+
+> more information, see ?get_biopath_score
+
+
+- data. a matrix, row represent gene, col represent sample, must contain row names(Gene ID) and col names(Sample ID)
+- biopath_genes.  a vector, the Gene ID of a bio-pathway you want to caculate.
+- normals.  a vector, TURE or FALSE of the samples, if sample is Normal then TRUE, else is Tumor then FALSE
+- ranks.  a vector or NULL, if not have normals, rank your samples
+- attempts. a non-negative integer, default 50, iter times
+- maximize_stability. maximize_stability=T, then algorithm will run more times to maximize score stability, very slow.
+- min_exp.  use min_exp replace gene expression which lower than it, if min_exp = NULL, than not replace, default 2
+- min_std.  use min std to cut-off gene whose std below than it, min_std must > 0, default 0.1
+
+
+
+### (2) plot3D_lpc 
+```r
+plot3D_lpc = function(res.lpc, normals, drawLine = F, outputHTML = F, outputDir = "./plot", fileName = "plot")
+```
+
+> more information, see ?plot3D_lpc
+
+- res.lpc.  data after run get_biopath_score
+- normals.  a vector of the samples, if samples is Normal then TRUE, else Tumor then FALSE
+- outputHTML. if need output this plot as a html file is TRUE, if not then FALSE
+- outputDir.  if outputHTML=T, this is availiable, the output file directory
+- fileName. if outputHTML=T, this is availiable, the output file name.
+
+
+
+## Examples
+```{R, eval = F}
+library(biopathscore)
+data("dat_brca")
+data('v_brca_normals')
+data('l_kegg_gs_min')
+
+
+test_pathway = l_kegg_gs_min$KEGG_DNA_REPLICATION
+
+
+### Examples 1: not use maximize_stability = F, (if run slow, set attempts lower number)
+pds = get_biopath_score(data = dat_brca, biopath_genes = test_pathway, normals = v_brca_normals,
+                        attempts = 100, maximize_stability = F)
+
+
+plot3D_lpc(pds, v_brca_normals,drawLine = F, outputHTML = F )
+plot3D_lpc(pds, v_brca_normals,drawLine = T, outputHTML = F )
+
+
+### Examples 1: use maximize_stability = T, very slow
+pds2 = get_biopath_score(data = dat_brca, biopath_genes = test_pathway, normals = v_brca_normals,
+                        attempts = 100, maximize_stability = T)
+
+
+plot3D_lpc(pds2, v_brca_normals,drawLine = F, outputHTML = F )
+plot3D_lpc(pds2, v_brca_normals,drawLine = T, outputHTML = F )
+
+
+```
+

@@ -2,7 +2,7 @@
 # * Name: sen@uga.edu
 # * Date: Tue Jun 06 21:30:13 2017
 # * Detail: null
-# *         
+# *
 # ********************************************
 library(stringr)
 root.path = "E:/Programming/CODE/LPC/"
@@ -18,7 +18,7 @@ gmt2list = function(file.path, ...)
   v.names = sapply(gmt, function(line){line[1]}, simplify = T)
   gmt = lapply(gmt, function(line){line = line[-c(1:2)]; line = str_trim(line)})
   names(gmt) = v.names
-  
+
   return(gmt)
 }
 
@@ -27,12 +27,26 @@ gmt2list = function(file.path, ...)
 l.hallmark.gs = gmt2list("E:/Programming/DATA/msigdb/h.all.v6.0.entrez.gmt")
 save(l.hallmark.gs, file = paste0(data.path2, "l.hallmark.gs.RData"))
 
-l.kegg.gs = gmt2list("E:/Programming/DATA/msigdb/c2.cp.kegg.v6.0.entrez.gmt")
-save(l.kegg.gs, file = paste0(data.path2, "l.kegg.gs.RData"))
-
 l.go.bp.gs = gmt2list("E:/Programming/DATA/msigdb/c5.bp.v6.0.entrez.gmt")
 save(l.go.bp.gs, file = paste0(data.path2, "l.go.bp.gs.RData"))
 
+
+
+
+l.kegg.gs = gmt2list("E:/Programming/DATA/msigdb/c2.cp.kegg.v6.0.entrez.gmt")
+save(l.kegg.gs, file = paste0(data.path2, "l.kegg.gs.entrez.RData"))
+
+
+l.kegg.gs2 = gmt2list("E:/Programming/DATA/msigdb/c2.cp.kegg.v6.0.symbols.gmt")
+save(l.kegg.gs, file = paste0(data.path2, "l.kegg.gs.symbols.RData"))
+
+for(i in 1:length(l.kegg.gs)){
+  names(l.kegg.gs[[i]]) = l.kegg.gs2[[i]]
+}
+save(l.kegg.gs, file = paste0(data.path2, "l.kegg.gs.RData"))
+
+
+l.kegg.gs[[10]][4]
 
 l.kegg.min.gs = vector('list',5)
 names(l.kegg.min.gs) = names(l.kegg.gs)[c(95,114,93,76,162)]

@@ -5,8 +5,31 @@
 # *
 # ********************************************
 
+#' Get biopath score by calculate the gene expression data
+#'
+#' @param data a matrix, row represent gene, col represent sample, must contain row names(Gene ID) and col names(Sample ID)
+#' @param biopath_genes a vector, the Gene ID of a bio-pathway you want to caculate.
+#' @param normals a vector, TURE or FALSE of the samples, if sample is Normal then TRUE, else is Tumor then FALSE
+#' @param ranks a vector or NULL, if not have normals, rank your samples
+#' @param attempts a non-negative integer, default 50, iter times
+#' @param maximize_stability maximize_stability=T, then algorithm will run more times to maximize score stability, very slow.
+#' @param min_exp use min_exp replace gene expression which lower than it, if min_exp = NULL, than not replace, default 2
+#' @param min_std use min std to cut-off gene whose std below than it, min_std must > 0, default 0.1
+#'
 #' @export
-get_biopath_score = function(data, biopath_genes,normals=NULL, ranks=NULL,attempts = 50, maximize_stability=F, use_min = T, min_exp = 2, min_std = 0.1)
+#'
+#' @examples
+#' library(biopathscore)
+#' data("dat_brca")
+#' data('v_brca_normals')
+#' data('l_kegg_gs_min')
+#' test_pathway = l_kegg_gs_min$KEGG_DNA_REPLICATION
+#' pds = get_biopath_score(data = dat_brca, biopath_genes = test_pathway, normals = v_brca_normals, maximize_stability = F)
+#' pds2 = get_biopath_score(data = dat_brca, biopath_genes = test_pathway, normals = v_brca_normals, maximize_stability = T)
+#'
+#' plot3D_lpc(pds, v_brca_normals,drawLine = F, outputHTML = F )
+#' plot3D_lpc(pds2, v_brca_normals,drawLine = F, outputHTML = F )
+get_biopath_score = function(data, biopath_genes,normals=NULL, ranks=NULL,attempts = 50, maximize_stability=F, min_exp = 2, min_std = 0.1)
 {
 
   logfile = format(Sys.time(), "%Y%m%d-%H%M%S.log")
@@ -20,11 +43,15 @@ get_biopath_score = function(data, biopath_genes,normals=NULL, ranks=NULL,attemp
   dat_min_exp = round(min(data),2)
   dat_min_std = round(min(apply(data, 1, sd)),2)
 
-  # ***********
-  # Min_exp &&& min_std
-  # cut-off by min_std
-  min_exp = max(dat_min_exp, min_exp)
-  data[data<min_exp]=min_exp		# the minime expression data
+
+  if(!is.null(min_exp)){
+    min_exp = max(dat_min_exp, min_exp)
+    data[data<min_exp]=min_exp		# the minime expression data
+  }
+
+  if(min_std <= 0) {
+    stop("invalid min_std = ",min_std, ", it should > 0")
+  }
 
   min_std = max(dat_min_std, min_std)
   v.data.sd = apply(data, 1, sd)
@@ -124,10 +151,24 @@ get_biopath_score = function(data, biopath_genes,normals=NULL, ranks=NULL,attemp
     return(si)
   }
 
-  si=list(scores = res$score,genesinpathway = v.pathway.id,newmeanstd = res$sig,origmeanstd = res$origsig,pathwaysize = res$k,
-          curves = res$thecurve,curves_order = res$tag,or.curve = res$thecurve.o ,z = res$z,compin = res$isin,
-          xm = xm, xs = xs,k2 = k2, pv = sum(summary(t)$importance[2, res$isin]),
-          pca = t,samplings=samplings,logfile=logfile) #1 modify
+  si=list(scores = res$score,
+          normals = normals,
+          genesinpathway = v.pathway.id,
+          newmeanstd = res$sig,
+          origmeanstd = res$origsig,
+          pathwaysize = res$k,
+          curves = res$thecurve,
+          curves_order = res$tag,
+          or.curve = res$thecurve.o ,
+          z = res$z,
+          compin = res$isin,
+          xm = xm,
+          xs = xs,
+          k2 = k2,
+          pv = sum(summary(t)$importance[2, res$isin]),
+          pca = t,
+          samplings=samplings
+          )
 
   return(si)
 }
